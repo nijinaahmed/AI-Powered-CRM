@@ -1,0 +1,45 @@
+import uuid
+from datetime import datetime
+
+from sqlalchemy import Boolean, CheckConstraint, DateTime, String, Text, func, text
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column
+
+from app.database import Base
+
+
+class Customer(Base):
+    """A customer profile and login identity (Database Guide, section 5.1)."""
+
+    __tablename__ = "customers"
+    __table_args__ = (
+        CheckConstraint(
+            "customer_status IN ('ACTIVE', 'INACTIVE', 'BLOCKED')",
+            name="status",
+        ),
+    )
+
+    customer_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    customer_number: Mapped[str] = mapped_column(String(20), unique=True)
+    first_name: Mapped[str] = mapped_column(String(80))
+    last_name: Mapped[str | None] = mapped_column(String(80))
+    email: Mapped[str | None] = mapped_column(String(255), unique=True)
+    phone: Mapped[str | None] = mapped_column(String(30), unique=True)
+    password_hash: Mapped[str | None] = mapped_column(Text)
+    customer_status: Mapped[str] = mapped_column(
+        String(20), default="ACTIVE", server_default="ACTIVE"
+    )
+    email_verified: Mapped[bool] = mapped_column(
+        Boolean, default=False, server_default=text("false")
+    )
+    phone_verified: Mapped[bool] = mapped_column(
+        Boolean, default=False, server_default=text("false")
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
