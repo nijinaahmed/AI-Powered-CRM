@@ -6,3 +6,4 @@ python-dotenv
 pydantic
 pydantic-settings
 alembic
+argon2-cffi
